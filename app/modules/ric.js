@@ -215,12 +215,12 @@ class ric extends BaseModule {
                 MODE: this.setMode.SET_ANALOG_IN,
                 UPDATE: 0,
             },
-            allServoRrun: {
-                MODE: SET_PORT_DISABLE,
-                VALUE: null,
+            allServoPort: {
+                MODE: this.setMode.SET_PORT_DISABLE,
+                VALUE: { 1: 90, 2: 90, 3: 90, 4: 90, 5: 90, 6: 90, 7: 90 },
                 RUNTIME: 20,
+                UPDATE: 0,
             },
-
         };
         this.dataFromDevice['com'] = 'stop';
     }
@@ -511,20 +511,40 @@ class ric extends BaseModule {
             }
 
             getkeys.forEach((portNo) => {
-                
+
                 // 불용 코드 삭제
-                
-                Object.keys(getData[portNo]).forEach((key) => {
-                    if (!Object.prototype.hasOwnProperty.call(this.dataFromEntry[portNo], key)) {
-                        //console.log("this.dataFromEntry[", portNo, "][", key, "]:", this.dataFromEntry[portNo][key]);
-                        this.dataFromEntry[portNo][key] = undefined;
-                    }
-                    if (this.dataFromEntry[portNo][key] != getData[portNo][key]) {
-                        this.dataFromEntry[portNo][key] = getData[portNo][key];
+
+                if (portNo == 'allServoPort') {
+                    if (this.dataFromEntry[portNo].MODE != getData[portNo].MODE) {
+                        this.dataFromEntry[portNo].MODE = getData[portNo].MODE;
                         this.dataFromEntry[portNo].UPDATE = 2;
-                        //console.log("Data From Entry[", portNo, "] : ", this.dataFromEntry[portNo]);
+                        //console.log("all servo mode changed");
                     }
-                });
+                    if (this.dataFromEntry[portNo].RUNTIME != getData[portNo].RUNTIME) {
+                        this.dataFromEntry[portNo].RUNTIME = getData[portNo].RUNTIME;
+                        this.dataFromEntry[portNo].UPDATE = 2;
+                        //console.log("all servo run-time changed");
+                    }
+                    Object.keys(getData[portNo].VALUE).forEach((angle) => {
+                        if (this.dataFromEntry[portNo].VALUE[angle] != getData[portNo].VALUE[angle]) {
+                            this.dataFromEntry[portNo].VALUE[angle] = getData[portNo].VALUE[angle]
+                            this.dataFromEntry[portNo].UPDATE = 2;
+                            //console.log("all servo value changed ", this.dataFromEntry[portNo].VALUE[angle]);
+                        }
+                    });
+                } else {
+                    Object.keys(getData[portNo]).forEach((key) => {
+                        if (!Object.prototype.hasOwnProperty.call(this.dataFromEntry[portNo], key)) {
+                            //console.log("this.dataFromEntry[", portNo, "][", key, "]:", this.dataFromEntry[portNo][key]);
+                            this.dataFromEntry[portNo][key] = undefined;
+                        }
+                        if (this.dataFromEntry[portNo][key] != getData[portNo][key]) {
+                            this.dataFromEntry[portNo][key] = getData[portNo][key];
+                            this.dataFromEntry[portNo].UPDATE = 2;
+                            //console.log("Data From Entry[", portNo, "] : ", this.dataFromEntry[portNo]);
+                        }
+                    });
+                }
             });
         }
         else if (this.entryJS_State == 2) {
