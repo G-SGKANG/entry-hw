@@ -11,7 +11,7 @@
 
 const BaseModule = require('./baseModule');
 
-class mechatro extends BaseModule {
+class ric extends BaseModule {
     // 클래스 내부에서 사용될 필드들을 이곳에서 선언합니다.
     constructor() {
         super();
@@ -27,6 +27,11 @@ class mechatro extends BaseModule {
         //         VALUE: 0,
         //         UPDATE: 2,  // 업데이트 횟수 셋팅
         //     },
+        //    allServoRrun:{
+        //    MODE:    
+        //    VALUE:
+        //    RUNTIME:
+        //    },
         // }
 
         this.dataFromDevice = {};
@@ -210,6 +215,12 @@ class mechatro extends BaseModule {
                 MODE: this.setMode.SET_ANALOG_IN,
                 UPDATE: 0,
             },
+            allServoRrun: {
+                MODE: SET_PORT_DISABLE,
+                VALUE: null,
+                RUNTIME: 20,
+            },
+
         };
         this.dataFromDevice['com'] = 'stop';
     }
@@ -500,10 +511,9 @@ class mechatro extends BaseModule {
             }
 
             getkeys.forEach((portNo) => {
-                if (!Object.prototype.hasOwnProperty.call(this.dataFromEntry, portNo)) {
-                    //console.log("this.dataFromEntry[", portNo, "]:", this.dataFromEntry[portNo]);
-                    this.dataFromEntry[portNo] = {};
-                }
+                
+                // 불용 코드 삭제
+                
                 Object.keys(getData[portNo]).forEach((key) => {
                     if (!Object.prototype.hasOwnProperty.call(this.dataFromEntry[portNo], key)) {
                         //console.log("this.dataFromEntry[", portNo, "][", key, "]:", this.dataFromEntry[portNo][key]);
@@ -548,4 +558,4 @@ class mechatro extends BaseModule {
 
 }
 
-module.exports = new mechatro();
+module.exports = new ric();

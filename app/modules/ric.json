@@ -9,7 +9,7 @@
         "win32",
         "darwin"
     ],
-    "icon": "ric.png",
+    "icon": "ric_1.png",
     "module": "ric.js",
     "driver": [
         {
