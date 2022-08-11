@@ -6,7 +6,7 @@
     },
     "category": "board",
     "platform": ["win32", "darwin"],
-    "icon": "ric_1.png",
+    "icon": "ric.png",
     "selectPort": true,
     "module": "ric.js",
     "driver": {
