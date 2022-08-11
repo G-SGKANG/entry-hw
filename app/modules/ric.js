@@ -103,7 +103,7 @@ class ric extends BaseModule {
                 '13': 11,
                 '16': 12,
                 '17': 13,
-                '18': 15,
+                '18': 14,
                 '19': 15, // End H Bit
             },
             ANALOG_IN: {
@@ -161,17 +161,17 @@ class ric extends BaseModule {
         this.portMapToEntry = {  // 필요한 포트만 선택하여 나열
             DIGITAL_L: {
                 '0': 2,
-                '1': 4,
-                '2': 5,
-                '3': 6,
-                '4': 7,
-                '5': 10,
+                '2': 4,
+                '3': 5,
+                '4': 6,
+                '5': 7,
             },
             DIGITAL_H: {
-                '0': 16,
-                '1': 17,
-                '2': 18,
-                '3': 19,
+                '0': 10,
+                '4': 16,
+                '5': 17,
+                '6': 18,
+                '7': 19,
             },
             ANALOG: {
                 '2': 2,
@@ -288,7 +288,7 @@ class ric extends BaseModule {
         let value;
         let modeGroup;
         let idx;
-        console.log("dataFromEntry : ", this.dataFromEntry);
+        // console.log("dataFromEntry : ", this.dataFromEntry);
 
         if (this.entryJS_State == 0) {  // 하드웨어 연결 or 엔트리 stop시 초기화 , 포트 모드 초기화
             this.entryJS_State = 1;
