@@ -187,7 +187,7 @@ class ric extends BaseModule {
     }
 
     initDataFromEntryStopState() {
-        this.dataFromEntry = {
+        this.dataFromEntry = {   // 인풋모드에서 사용하므로 
             '0': {
                 MODE: this.setMode.SET_DIGITAL_IN,
                 UPDATE: 0,
@@ -248,12 +248,12 @@ class ric extends BaseModule {
                 MODE: this.setMode.SET_ANALOG_IN,
                 UPDATE: 0,
             },
-            allServoPort: {
+            /*allServoPort: {
                 MODE: this.setMode.SET_PORT_DISABLE,
                 POSITION: { 0: 90, 1: 90, 2: 90, 3: 90, 4: 90, 5: 90, 6: 90 },
                 VALUE: 20,
                 UPDATE: 0,
-            },
+            },*/
         };
         this.dataFromDevice['com'] = 'stop';
     }
@@ -341,7 +341,7 @@ class ric extends BaseModule {
                                     query = value & 0x7f;
                                     queryString.push(query);
                                     //console.log("p[", idx, '] v ', query);
-                                    //this.dataFromEntry[p] = value;   // 아웃풋 데이터 모니터링 창에 값  업데이트  되도록 저장
+                                    this.dataFromDevice[portNo] = value;   // 아웃풋 데이터 모니터링 창에 값  업데이트  되도록 저장
                                 });
                                 // 서보 RunTime 전송
                                 mode = this.setMode.SET_ALL_SERVO_RUNTIME
@@ -393,8 +393,8 @@ class ric extends BaseModule {
                                 break;
                         }
                         break;
-
-                    case this.setMode.SET_SERVO_POSITION:
+                    /*
+                    case this.setMode.SET_SERVO_POSITION: // 사용하지 않음
                         //Data1
                         idx = this.portMapToDevice.SERVO[portNo];
                         query = mode + ((value >> 4) & 0x08) + idx;
@@ -404,18 +404,32 @@ class ric extends BaseModule {
                         queryString.push(query);
                         this.dataFromDevice[portNo] = value;    // 아웃풋 데이터 모니터링 창에 값  업데이트  되도록 저장
                         break;
-
+                    */
                     case this.setMode.SET_GROUP_3:
                         switch (mode) {
                             case this.setMode.SET_SERVO_SPEED:
-                                //Data1
                                 idx = this.portMapToDevice.SERVO[portNo];
+                                // 포지션 전송
+                                mode = this.setMode.SET_SERVO_POSITION;
+                                value = this.dataFromEntry[portNo].POSITION;
+                                query = mode + ((value >> 4) & 0x08) + idx;
+                                queryString.push(query);
+                                //console.log("p[", idx, "]", query);
+                                query = value & 0x7f;
+                                queryString.push(query);
+                                //console.log("p[", idx, '] v ', query);
+                                this.dataFromDevice[portNo] = value;   // 아웃풋 데이터 모니터링 창에 값  업데이트  되도록 저장
+
+                                // 속도 전송
+                                mode = this.setMode.SET_SERVO_SPEED;
+                                value = this.dataFromEntry[portNo].VALUE;
                                 query = mode + ((value >> 4) & 0x08) + idx;
                                 queryString.push(query);
                                 //Data2
                                 query = value & 0x7f;
                                 queryString.push(query);
                                 break;
+
                             case this.setMode.SET_SERVO_RUNTIME:
                                 query = mode;
                                 queryString.push(query);
@@ -560,36 +574,49 @@ class ric extends BaseModule {
        엔트리가 중지 되면 SetZero 에서 Entry.hw.update() 를 통해 SEND_DATA : {} 값이 들어옴.*/
     handleRemoteData(handler) {
         const getData = handler.read('SEND_DATA');
-        const getkeys = Object.keys(getData);
+        const keysPorNo = Object.keys(getData);
         //console.log(getData);
-        if (getkeys.length) {
+        if (keysPorNo.length) {
             if (this.entryJS_State == 1) {   // 1(엔트리 정지로 초기화 완료) --> 2(엔트리 RUN 상태 블록 사용 시작)
                 this.entryJS_State = 2;
                 this.dataFromDevice['com'] = 'run';
                 //console.log(" EntryJS State : 0 -> 1");
             }
 
-            getkeys.forEach((portNo) => {
-                if (!Object.prototype.hasOwnProperty.call(this.dataFromEntry, portNo)) {
-                    //console.log("this.dataFromEntry[", portNo, "]:", this.dataFromEntry[portNo]);
-                    this.dataFromEntry[portNo] = {};
+            keysPorNo.forEach((LV1) => {
+                if (!Object.prototype.hasOwnProperty.call(this.dataFromEntry, LV1)) {
+                    //console.log("this.dataFromEntry[", LV1, "]:", this.dataFromEntry[LV1]);
+                    this.dataFromEntry[LV1] = {};
                 }
-                Object.keys(getData[portNo]).forEach((key) => {
-                    if (!Object.prototype.hasOwnProperty.call(this.dataFromEntry[portNo], key)) {
-                        //console.log("this.dataFromEntry[", portNo, "][", key, "]:", this.dataFromEntry[portNo][key]);
-                        this.dataFromEntry[portNo][key] = undefined;
-                    }
-                    if (key == "POSITION") {
-                        Object.keys(getData[portNo].POSITION).forEach((idx) => {
-                            if (this.dataFromEntry[portNo].POSITION[idx] != getData[portNo].POSITION[idx]) {
-                                this.dataFromEntry[portNo].POSITION[idx] = getData[portNo].POSITION[idx]
-                                this.dataFromEntry[portNo].UPDATE = 2;
+                Object.keys(getData[LV1]).forEach((LV2) => {
+                    const keysLV2 = Object.keys(getData[LV1][LV2]);
+                    if (keysLV2.length) {
+                        if (!Object.prototype.hasOwnProperty.call(this.dataFromEntry[LV1], LV2)) {
+                            //console.log("this.dataFromEntry[", LV1, "][", LV2, "]:", this.dataFromEntry[LV1][LV2]);
+                            this.dataFromEntry[LV1][LV2] = {};
+                        }
+                        //console.log("this.dataFromEntry[", LV1, "][", LV2, "]:", this.dataFromEntry[LV1][LV2]);
+                        Object.keys(keysLV2).forEach((idx) => {
+                            if (!Object.prototype.hasOwnProperty.call(this.dataFromEntry[LV1][LV2], idx)) {
+                                //console.log("this.dataFromEntry[", LV1, "][", LV2, "][", idx, "]");
+                                this.dataFromEntry[LV1][LV2][idx] = undefined;
+                            }
+                            if (this.dataFromEntry[LV1][LV2][idx] != getData[LV1][LV2][idx]) {
+                                this.dataFromEntry[LV1][LV2][idx] = getData[LV1][LV2][idx]
+                                this.dataFromEntry[LV1].UPDATE = 2;
                             }
                         });
-                    } else if (this.dataFromEntry[portNo][key] != getData[portNo][key]) {
-                        this.dataFromEntry[portNo][key] = getData[portNo][key];
-                        this.dataFromEntry[portNo].UPDATE = 2;
-                        //console.log("Data From Entry[", portNo, "] : ", this.dataFromEntry[portNo]);
+                    }
+                    else {
+                        if (!Object.prototype.hasOwnProperty.call(this.dataFromEntry[LV1], LV2)) {
+                            //console.log("this.dataFromEntry[", LV1, "][", LV2, "]:", this.dataFromEntry[LV1][LV2]);
+                            this.dataFromEntry[LV1][LV2] = undefined;
+                        }
+                        if (this.dataFromEntry[LV1][LV2] != getData[LV1][LV2]) {
+                            this.dataFromEntry[LV1][LV2] = getData[LV1][LV2];
+                            this.dataFromEntry[LV1].UPDATE = 2;
+                            //console.log("Data From Entry[", LV1, "] : ", this.dataFromEntry[LV1]);
+                        }
                     }
                 });
             });
